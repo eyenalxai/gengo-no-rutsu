@@ -42,11 +42,8 @@ pub fn filter_native_words(words: Vec<Words>, to_check: String) -> Vec<Words> {
 
 pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Words>) -> ResponseResult<()> {
     let msg_text = match msg.text() {
-        Some(text) => text,
-        None => {
-            log::error!("Failed to get text from message");
-            panic!("Failed to get text from message");
-        }
+        Some(b) => b,
+        None => return respond(()),
     };
 
     let non_native_words = filter_native_words(words, msg_text.to_string());
