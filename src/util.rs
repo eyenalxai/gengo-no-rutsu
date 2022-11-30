@@ -21,14 +21,14 @@ pub fn get_words_from_json() -> Vec<Words> {
     }
 }
 
-pub fn filter_native_words(words: Vec<Words>, to_check: String) -> Vec<Words> {
+fn filter_native_words(words: Vec<Words>, to_check: String) -> Vec<Words> {
     let bad_words = to_check.split_whitespace().collect::<Vec<&str>>();
+
     words
         .iter()
         .cloned()
-        .filter(|word| {
+        .filter(|word: &Words| {
             bad_words.iter().any(|bad_word| {
-                // bad_word to lowercase
                 let bad_word_lower = bad_word.to_lowercase().as_str().to_owned();
                 normalized_damerau_levenshtein(word.non_native.as_str(), &bad_word_lower) >= 0.9
                     || normalized_damerau_levenshtein(
