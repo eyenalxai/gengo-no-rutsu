@@ -65,6 +65,7 @@ async fn main() {
                 .expect("Couldn't setup webhook");
 
             Dispatcher::builder(bot, words_handler)
+                .dependencies(dptree::deps![words])
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch_with_listener(listener, LoggingErrorHandler::new())
