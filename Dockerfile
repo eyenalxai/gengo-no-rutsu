@@ -13,6 +13,7 @@ FROM rust:1.65.0 as runner
 WORKDIR /app
 
 COPY --from=builder /build/target/release/ /app
+COPY ./words.json /app/words.json
 
 ENV TELOXIDE_TOKEN=${TELOXIDE_TOKEN}
 ENV RUST_LOG=${RUST_LOG}

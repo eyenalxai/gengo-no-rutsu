@@ -8,16 +8,16 @@ use teloxide::types::Message;
 use teloxide::{respond, Bot};
 
 pub fn get_words_from_json() -> Vec<Words> {
-    let file = match File::open("src/words.json") {
+    let file = match File::open("./words.json") {
         Ok(file) => file,
-        Err(e) => panic!("Error opening file: {}", e),
+        Err(e) => panic!("Error opening file words.json: {}", e),
     };
 
     let reader = BufReader::new(file);
 
     match serde_json::from_reader(reader) {
         Ok(words) => words,
-        Err(e) => panic!("Error reading file: {}", e),
+        Err(e) => panic!("Error reading file words.json: {}", e),
     }
 }
 
