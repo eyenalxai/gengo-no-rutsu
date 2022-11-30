@@ -34,6 +34,5 @@ fabric.properties
 !.idea/runConfigurations
 debug/
 target/
-Cargo.lock
 **/*.rs.bk
 *.pdb
