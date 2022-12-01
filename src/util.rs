@@ -50,7 +50,7 @@ fn build_answer_text(non_native_words: Vec<Word>) -> String {
     }
 
     format!(
-        "{}\nБерегите чистоту русского языка!",
+        "{}\nБерегите корни русского языка!",
         non_native_words.iter().fold("".to_string(), |acc, word| acc
             + format!("{}\n", word).as_str())
     )
