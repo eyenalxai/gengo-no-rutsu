@@ -29,7 +29,6 @@ async fn main() {
     };
 
     let words_handler = Update::filter_message().branch(dptree::endpoint(words_answer));
-
     let words = get_words_from_json();
 
     match polling_mode {

@@ -396,6 +396,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "pretty_env_logger",
+ "rand",
  "serde",
  "serde_json",
  "strsim",
