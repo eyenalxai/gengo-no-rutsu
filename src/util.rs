@@ -24,13 +24,20 @@ pub fn get_words_from_json() -> Vec<Word> {
 }
 
 fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
-    let bad_words = to_check.split_whitespace().collect::<Vec<&str>>();
+    let to_check_only_alphabetic = to_check
+        .chars()
+        .filter(|c| !c.is_alphabetic())
+        .collect::<String>();
+
+    let words_to_check = to_check_only_alphabetic
+        .split_whitespace()
+        .collect::<Vec<&str>>();
 
     words
         .iter()
         .cloned()
         .filter(|word: &Word| {
-            bad_words.iter().any(|bad_word| {
+            words_to_check.iter().any(|bad_word| {
                 let bad_word_lower = bad_word.to_lowercase().as_str().to_owned();
                 word.is_non_native(bad_word_lower)
             })
