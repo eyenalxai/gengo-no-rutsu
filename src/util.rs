@@ -6,6 +6,7 @@ use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
 use teloxide::types::Message;
 use teloxide::{respond, Bot};
+
 pub fn get_words_from_json() -> Vec<Word> {
     let file = match File::open("./words.json") {
         Ok(file) => file,
