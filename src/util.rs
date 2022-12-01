@@ -54,20 +54,25 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
         }
     };
 
-    match msg.chat.is_private() {
-        true => {
+    match (non_native_words.is_empty(), msg.chat.is_private()) {
+        (true, true) => {
             bot.send_message(msg.chat.id, answer_text)
                 .reply_to_message_id(msg.id)
                 .await?;
             respond(())
         }
-        false => {
-            if thread_rng().gen_range(0.0..1.0) <= 0.95 {
-                return respond(());
-            }
+        (true, false) => respond(()),
+        (false, true) => {
             bot.send_message(msg.chat.id, answer_text)
                 .reply_to_message_id(msg.id)
                 .await?;
+            respond(())
+        }
+        (false, false) => {
+            if thread_rng().gen_range(0.0..1.0) <= 0.95 {
+                return respond(());
+            }
+            bot.send_message(msg.chat.id, answer_text).await?;
             respond(())
         }
     }
