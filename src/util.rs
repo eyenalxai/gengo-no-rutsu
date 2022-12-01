@@ -1,7 +1,9 @@
 use crate::types::{Check, Word};
 use rand::{thread_rng, Rng};
+use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io::BufReader;
+use strsim::normalized_damerau_levenshtein;
 use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
 use teloxide::types::Message;
@@ -36,6 +38,18 @@ fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
         .collect::<Vec<Word>>()
 }
 
+fn build_answer_text(non_native_words: Vec<Word>) -> String {
+    if non_native_words.is_empty() {
+        return "Английщины не обнаружено!".to_string();
+    }
+
+    format!(
+        "{}\nБерегите чистоту русского языка!",
+        non_native_words.iter().fold("".to_string(), |acc, word| acc
+            + format!("{}\n", word).as_str())
+    )
+}
+
 pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseResult<()> {
     let msg_text = match msg.text() {
         Some(b) => b,
@@ -46,38 +60,67 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
     let is_private_chat = !msg.chat.is_group() && !msg.chat.is_supergroup();
 
     match (non_native_words.is_empty(), is_private_chat) {
-        (true, true) => {
-            bot.send_message(msg.chat.id, "Английщины не обнаружено!".to_string())
+        (_, true) => {
+            bot.send_message(msg.chat.id, build_answer_text(non_native_words))
                 .reply_to_message_id(msg.id)
                 .await?;
             respond(())
         }
         (true, false) => respond(()),
-        (false, true) => {
-            let answer_text = format!(
-                "{}\nБерегите чистоту русского языка!",
-                non_native_words.iter().fold("".to_string(), |acc, word| acc
-                    + format!("{}\n", word).as_str())
-            );
-            bot.send_message(msg.chat.id, answer_text)
-                .reply_to_message_id(msg.id)
-                .await?;
-            respond(())
-        }
         (false, false) => {
             if thread_rng().gen_range(0.0..1.0) <= 0.90 {
                 return respond(());
             }
-            let answer_text = format!(
-                "{}\nБерегите чистоту русского языка!",
-                non_native_words.iter().fold("".to_string(), |acc, word| acc
-                    + format!("{}\n", word).as_str())
-            );
 
-            bot.send_message(msg.chat.id, answer_text)
+            bot.send_message(msg.chat.id, build_answer_text(non_native_words))
                 .reply_to_message_id(msg.id)
                 .await?;
             respond(())
         }
+    }
+}
+
+impl Check for Word {
+    fn is_non_native(&self, non_native_word: String) -> bool {
+        let non_native_word_str = non_native_word.as_str();
+        let unrecognized_forms = self
+            .unrecognized_forms
+            .split(',')
+            .filter(|x| !x.is_empty())
+            .map(|x| x.trim())
+            .collect::<Vec<&str>>();
+
+        return match normalized_damerau_levenshtein(self.non_native.as_str(), non_native_word_str)
+            >= 0.9
+        {
+            true => true,
+            false => {
+                match !self.extra_normal_form.is_empty()
+                    && normalized_damerau_levenshtein(
+                        self.extra_normal_form.as_str(),
+                        non_native_word_str,
+                    ) >= 0.9
+                {
+                    true => true,
+                    false => unrecognized_forms.iter().any(|unrecognized_form| {
+                        normalized_damerau_levenshtein(unrecognized_form, non_native_word_str)
+                            >= 0.9
+                    }),
+                }
+            }
+        };
+    }
+}
+
+impl Display for Word {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if !self.inexact.is_empty() {
+            return write!(
+                f,
+                "Если вы имели в виду не {}, то будет правильно {}",
+                self.inexact, self.native
+            );
+        }
+        write!(f, "Не {}, а {}.", self.non_native, self.native)
     }
 }
