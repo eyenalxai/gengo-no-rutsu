@@ -72,10 +72,12 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
                 respond(())
             }
             false => {
-                if thread_rng().gen_range(0.0..1.0) <= 0.95 {
+                if thread_rng().gen_range(0.0..1.0) <= 0.90 {
                     return respond(());
                 }
-                bot.send_message(msg.chat.id, answer_text).await?;
+                bot.send_message(msg.chat.id, answer_text)
+                    .reply_to_message_id(msg.id)
+                    .await?;
                 respond(())
             }
         },
