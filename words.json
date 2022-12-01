@@ -59832,19 +59832,11 @@
         "unrecognized_forms": ""
     },
     {
-        "non_native": "нюдес",
-        "exclusions": "",
-        "native": "обнажёнка",
-        "inexact": "",
-        "extra_normal_form": "",
-        "unrecognized_forms": ""
-    },
-    {
         "non_native": "нюдс",
         "exclusions": "",
         "native": "обнажёнка",
         "inexact": "",
-        "extra_normal_form": "",
+        "extra_normal_form": "нюдсы, нюдес",
         "unrecognized_forms": ""
     },
     {
