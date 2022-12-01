@@ -1,6 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
-use strsim::normalized_damerau_levenshtein;
 
 #[derive(Debug, Clone, Copy)]
 pub enum PollingMode {

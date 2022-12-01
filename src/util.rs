@@ -22,12 +22,13 @@ pub fn get_words_from_json() -> Vec<Word> {
         Err(e) => panic!("Error reading file words.json: {}", e),
     }
 }
-
 fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
+    println!("To check: {}", to_check);
     let to_check_only_alphabetic = to_check
         .chars()
-        .filter(|c| !c.is_alphabetic())
+        .filter(|c| !r#"!@#№$%:%^,.&*;()_-–—+=[]{}:"'|\?/<>~"#.contains(*c))
         .collect::<String>();
+    println!("To check only alphabetic: {}", to_check_only_alphabetic);
 
     let words_to_check = to_check_only_alphabetic
         .split_whitespace()
