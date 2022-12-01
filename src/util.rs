@@ -54,26 +54,30 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
         }
     };
 
-    match (non_native_words.is_empty(), msg.chat.is_private()) {
-        (true, true) => {
-            bot.send_message(msg.chat.id, answer_text)
-                .reply_to_message_id(msg.id)
-                .await?;
-            respond(())
-        }
-        (true, false) => respond(()),
-        (false, true) => {
-            bot.send_message(msg.chat.id, answer_text)
-                .reply_to_message_id(msg.id)
-                .await?;
-            respond(())
-        }
-        (false, false) => {
-            if thread_rng().gen_range(0.0..1.0) <= 0.95 {
-                return respond(());
+    match non_native_words.is_empty() {
+        true => match !msg.chat.is_group() && !msg.chat.is_supergroup() {
+            true => {
+                bot.send_message(msg.chat.id, answer_text)
+                    .reply_to_message_id(msg.id)
+                    .await?;
+                respond(())
             }
-            bot.send_message(msg.chat.id, answer_text).await?;
-            respond(())
-        }
+            false => respond(()),
+        },
+        false => match !msg.chat.is_group() && !msg.chat.is_supergroup() {
+            true => {
+                bot.send_message(msg.chat.id, answer_text)
+                    .reply_to_message_id(msg.id)
+                    .await?;
+                respond(())
+            }
+            false => {
+                if thread_rng().gen_range(0.0..1.0) <= 0.95 {
+                    return respond(());
+                }
+                bot.send_message(msg.chat.id, answer_text).await?;
+                respond(())
+            }
+        },
     }
 }
