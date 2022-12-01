@@ -43,44 +43,41 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
     };
 
     let non_native_words = filter_native_words(words, msg_text.to_string());
+    let is_private_chat = !msg.chat.is_group() && !msg.chat.is_supergroup();
 
-    let answer_text = match non_native_words.is_empty() {
-        true => "Английщины не обнаружено!".to_string(),
-        false => {
-            format!(
+    match (non_native_words.is_empty(), is_private_chat) {
+        (true, true) => {
+            bot.send_message(msg.chat.id, "Английщины не обнаружено!".to_string())
+                .reply_to_message_id(msg.id)
+                .await?;
+            respond(())
+        }
+        (true, false) => respond(()),
+        (false, true) => {
+            let answer_text = format!(
                 "{}\nБерегите чистоту русского языка!",
                 non_native_words.iter().fold("".to_string(), |acc, word| acc
                     + format!("{}\n", word).as_str())
-            )
+            );
+            bot.send_message(msg.chat.id, answer_text)
+                .reply_to_message_id(msg.id)
+                .await?;
+            respond(())
         }
-    };
+        (false, false) => {
+            if thread_rng().gen_range(0.0..1.0) <= 0.90 {
+                return respond(());
+            }
+            let answer_text = format!(
+                "{}\nБерегите чистоту русского языка!",
+                non_native_words.iter().fold("".to_string(), |acc, word| acc
+                    + format!("{}\n", word).as_str())
+            );
 
-    match non_native_words.is_empty() {
-        true => match !msg.chat.is_group() && !msg.chat.is_supergroup() {
-            true => {
-                bot.send_message(msg.chat.id, answer_text)
-                    .reply_to_message_id(msg.id)
-                    .await?;
-                respond(())
-            }
-            false => respond(()),
-        },
-        false => match !msg.chat.is_group() && !msg.chat.is_supergroup() {
-            true => {
-                bot.send_message(msg.chat.id, answer_text)
-                    .reply_to_message_id(msg.id)
-                    .await?;
-                respond(())
-            }
-            false => {
-                if thread_rng().gen_range(0.0..1.0) <= 0.90 {
-                    return respond(());
-                }
-                bot.send_message(msg.chat.id, answer_text)
-                    .reply_to_message_id(msg.id)
-                    .await?;
-                respond(())
-            }
-        },
+            bot.send_message(msg.chat.id, answer_text)
+                .reply_to_message_id(msg.id)
+                .await?;
+            respond(())
+        }
     }
 }
