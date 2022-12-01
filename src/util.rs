@@ -23,12 +23,10 @@ pub fn get_words_from_json() -> Vec<Word> {
     }
 }
 fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
-    println!("To check: {}", to_check);
     let to_check_only_alphabetic = to_check
         .chars()
         .filter(|c| !r#"!@#№$%:%^,.&*;()_-–—+=[]{}:"'|\?/<>~"#.contains(*c))
         .collect::<String>();
-    println!("To check only alphabetic: {}", to_check_only_alphabetic);
 
     let words_to_check = to_check_only_alphabetic
         .split_whitespace()
