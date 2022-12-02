@@ -394,6 +394,7 @@ dependencies = [
 name = "gengo-no-rutsu"
 version = "0.1.0"
 dependencies = [
+ "axum",
  "log",
  "pretty_env_logger",
  "rand",
