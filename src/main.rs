@@ -1,5 +1,7 @@
-mod types;
-mod util;
+mod answer;
+mod parse;
+mod str;
+mod word;
 
 use std::env;
 
@@ -9,9 +11,10 @@ use teloxide::error_handlers::LoggingErrorHandler;
 use teloxide::types::Update;
 use teloxide::{dptree, Bot};
 
-use crate::types::PollingMode;
-use crate::util::{get_words_from_json, words_answer};
+use crate::answer::words_answer;
+use crate::parse::get_words_from_json;
 use url::Url;
+use word::types::{PollingMode, Word};
 
 #[tokio::main]
 async fn main() {
@@ -28,8 +31,9 @@ async fn main() {
         Err(_) => panic!("POLLING_MODE env var is not set, probably..."),
     };
 
+    let words: Vec<Word> = get_words_from_json("./words.json");
+
     let words_handler = Update::filter_message().branch(dptree::endpoint(words_answer));
-    let words = get_words_from_json();
 
     match polling_mode {
         PollingMode::Polling => {
