@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_and_test:
-    name: Rust project
+    name: Build and Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
