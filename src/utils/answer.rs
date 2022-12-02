@@ -1,4 +1,4 @@
-use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP};
+use crate::utils::constant::{ALL_NATIVE_ANSWER, ANSWER_PROBABILITY, CALL_FOR_HELP};
 use rand::{thread_rng, Rng};
 use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
@@ -38,7 +38,7 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
         }
         (true, false) => respond(()),
         (false, false) => {
-            if thread_rng().gen_range(0.0..1.0) <= 0.90 {
+            if thread_rng().gen_range(0.0..1.0) <= ANSWER_PROBABILITY {
                 return respond(());
             }
 
