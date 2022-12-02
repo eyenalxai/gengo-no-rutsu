@@ -22,6 +22,7 @@ pub fn get_words_from_json() -> Vec<Word> {
         Err(e) => panic!("Error reading file words.json: {}", e),
     }
 }
+
 fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
     let to_check_only_alphabetic = to_check
         .chars()
@@ -35,7 +36,7 @@ fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
     words
         .iter()
         .cloned()
-        .filter(|word: &Word| {
+        .filter(|word: &Word| -> bool {
             words_to_check.iter().any(|bad_word| {
                 let bad_word_lower = bad_word.to_lowercase().as_str().to_owned();
                 word.is_non_native(bad_word_lower)
@@ -86,6 +87,19 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
     }
 }
 
+fn is_same_first_char(first_str: &str, second_str: &str) -> bool {
+    let second_str_first_char = match second_str.chars().next() {
+        Some(c) => c,
+        None => return false,
+    };
+    first_str.starts_with(second_str_first_char)
+}
+
+fn is_similar(first_str: &str, second_str: &str) -> bool {
+    is_same_first_char(first_str, second_str)
+        && normalized_damerau_levenshtein(first_str, second_str) >= 0.9
+}
+
 impl Check for Word {
     fn is_non_native(&self, non_native_word: String) -> bool {
         let non_native_word_str = non_native_word.as_str();
@@ -96,21 +110,15 @@ impl Check for Word {
             .map(|x| x.trim())
             .collect::<Vec<&str>>();
 
-        return match normalized_damerau_levenshtein(self.non_native.as_str(), non_native_word_str)
-            >= 0.9
-        {
+        return match is_similar(self.non_native.as_str(), non_native_word_str) {
             true => true,
             false => {
                 match !self.extra_normal_form.is_empty()
-                    && normalized_damerau_levenshtein(
-                        self.extra_normal_form.as_str(),
-                        non_native_word_str,
-                    ) >= 0.9
+                    && is_similar(self.extra_normal_form.as_str(), non_native_word_str)
                 {
                     true => true,
                     false => unrecognized_forms.iter().any(|unrecognized_form| {
-                        normalized_damerau_levenshtein(unrecognized_form, non_native_word_str)
-                            >= 0.9
+                        is_similar(unrecognized_form, non_native_word_str)
                     }),
                 }
             }
