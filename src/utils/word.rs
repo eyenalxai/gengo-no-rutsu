@@ -1,6 +1,19 @@
 use crate::utils::str::is_similar;
-use crate::utils::types::{Check, Word};
+use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Word {
+    pub non_native: String,
+    pub native: String,
+    pub inexact: String,
+    pub extra_normal_form: String,
+    pub unrecognized_forms: String,
+}
+
+pub trait Check {
+    fn is_non_native(&self, word: String) -> bool;
+}
 
 impl Check for Word {
     fn is_non_native(&self, non_native_word: String) -> bool {
@@ -61,4 +74,49 @@ pub fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
             })
         })
         .collect::<Vec<Word>>()
+}
+
+#[cfg(test)]
+mod word_tests {
+    use super::*;
+
+    #[test]
+    fn test_is_non_native() {
+        let word = Word {
+            non_native: "абберация".to_string(),
+            native: "отклонение".to_string(),
+            inexact: "".to_string(),
+            extra_normal_form: "аберация".to_string(),
+            unrecognized_forms: "".to_string(),
+        };
+
+        assert!(word.is_non_native("абберация".to_string()));
+        assert!(word.is_non_native("аберация".to_string()));
+        assert!(word.is_non_native("абберации".to_string()));
+        assert!(!word.is_non_native("отклонение".to_string()));
+    }
+
+    #[test]
+    fn test_fmt() {
+        let word_one = Word {
+            non_native: "абберация".to_string(),
+            native: "отклонение".to_string(),
+            inexact: "".to_string(),
+            extra_normal_form: "аберация".to_string(),
+            unrecognized_forms: "".to_string(),
+        };
+
+        assert_eq!(format!("{}", word_one), "Не абберация, а отклонение.");
+
+        let word_two = Word {
+            non_native: "кант".to_string(),
+            native: "1) оторочка, тесьма, выпушка 2) края скользяка (у лыж и снегоката)"
+                .to_string(),
+            inexact: "род мыслителя Иммануила Канта".to_string(),
+            extra_normal_form: "".to_string(),
+            unrecognized_forms: "".to_string(),
+        };
+
+        assert_eq!(format!("{}", word_two), "Если вы имели в виду не род мыслителя Иммануила Канта, то будет правильно 1) оторочка, тесьма, выпушка 2) края скользяка (у лыж и снегоката)");
+    }
 }

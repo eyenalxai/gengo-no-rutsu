@@ -8,18 +8,24 @@ use teloxide::{dptree, Bot};
 
 mod utils {
     pub mod answer;
+    pub mod constant;
     pub mod listener;
     pub mod parse;
     pub mod str;
-    pub mod types;
     pub mod word;
 }
 
 use crate::utils::answer::words_answer;
 use crate::utils::listener::axum_server;
 use crate::utils::parse::get_words_from_json;
-use crate::utils::types::{PollingMode, Word};
+use crate::utils::word::Word;
 use url::Url;
+
+#[derive(Debug, Clone, Copy)]
+pub enum PollingMode {
+    Polling,
+    Webhook,
+}
 
 #[tokio::main]
 async fn main() {

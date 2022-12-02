@@ -1,4 +1,4 @@
-use crate::word::types::Word;
+use crate::utils::word::Word;
 use std::fs::File;
 use std::io::BufReader;
 

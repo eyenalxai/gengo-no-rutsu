@@ -1,21 +1,22 @@
+use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP};
 use rand::{thread_rng, Rng};
 use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
 use teloxide::types::Message;
 use teloxide::{respond, Bot};
 
-use crate::utils::types::Word;
-use crate::utils::word::filter_native_words;
+use crate::utils::word::{filter_native_words, Word};
 
 fn build_answer_text(non_native_words: Vec<Word>) -> String {
     if non_native_words.is_empty() {
-        return "Английщины не обнаружено!".to_string();
+        return ALL_NATIVE_ANSWER.to_string();
     }
 
     format!(
-        "{}\nБерегите корни русского языка!",
+        "{}\n{}",
         non_native_words.iter().fold("".to_string(), |acc, word| acc
-            + format!("{}\n", word).as_str())
+            + format!("{}\n", word).as_str()),
+        CALL_FOR_HELP
     )
 }
 
@@ -46,5 +47,35 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
                 .await?;
             respond(())
         }
+    }
+}
+
+#[cfg(test)]
+mod answer_tests {
+    use crate::utils::answer::build_answer_text;
+    use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP};
+    use crate::utils::parse::get_words_from_json;
+    use crate::utils::word::{filter_native_words, Word};
+
+    #[test]
+    fn test_build_answer_text() {
+        let words: Vec<Word> = get_words_from_json("./words.json");
+        let non_native_words_one = filter_native_words(words.clone(), "приплясывание".to_string());
+
+        assert_eq!(
+            build_answer_text(non_native_words_one),
+            ALL_NATIVE_ANSWER.to_string()
+        );
+
+        let non_native_words_two =
+            filter_native_words(words.clone(), "кант систематик фабричный".to_string());
+
+        assert_eq!(
+            build_answer_text(non_native_words_two),
+            format!(
+                "{}\n{}",
+                "Если вы имели в виду не род мыслителя Иммануила Канта, то будет правильно 1) оторочка, тесьма, выпушка 2) края скользяка (у лыж и снегоката)\nНе систематик, а упорядочиватель.\nНе систематика, а порядок, деление, устройство.\nНе фабричный, а заводской.\n", CALL_FOR_HELP
+            )
+        );
     }
 }
