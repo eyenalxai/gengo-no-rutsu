@@ -1,9 +1,3 @@
-mod answer;
-mod listener;
-mod parse;
-mod str;
-mod word;
-
 use std::env;
 
 use teloxide::dispatching::update_listeners::webhooks;
@@ -12,11 +6,20 @@ use teloxide::error_handlers::LoggingErrorHandler;
 use teloxide::types::Update;
 use teloxide::{dptree, Bot};
 
-use crate::answer::words_answer;
-use crate::listener::axum_server;
-use crate::parse::get_words_from_json;
+mod utils {
+    pub mod answer;
+    pub mod listener;
+    pub mod parse;
+    pub mod str;
+    pub mod types;
+    pub mod word;
+}
+
+use crate::utils::answer::words_answer;
+use crate::utils::listener::axum_server;
+use crate::utils::parse::get_words_from_json;
+use crate::utils::types::{PollingMode, Word};
 use url::Url;
-use word::types::{PollingMode, Word};
 
 #[tokio::main]
 async fn main() {

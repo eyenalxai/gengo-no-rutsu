@@ -1,10 +1,11 @@
-use crate::word::types::Word;
-use crate::word::word::filter_native_words;
 use rand::{thread_rng, Rng};
 use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
 use teloxide::types::Message;
 use teloxide::{respond, Bot};
+
+use crate::utils::types::Word;
+use crate::utils::word::filter_native_words;
 
 fn build_answer_text(non_native_words: Vec<Word>) -> String {
     if non_native_words.is_empty() {

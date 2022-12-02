@@ -1,5 +1,5 @@
-use crate::str::is_similar;
-use crate::word::types::{Check, Word};
+use crate::utils::str::is_similar;
+use crate::utils::types::{Check, Word};
 use std::fmt::{Display, Formatter};
 
 impl Check for Word {
