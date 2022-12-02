@@ -4,28 +4,19 @@ mod parse;
 mod str;
 mod word;
 
-use axum::http::StatusCode;
-use axum::routing::get;
-use std::convert::Infallible;
 use std::env;
 
-use teloxide::dispatching::update_listeners::webhooks::{axum_to_router, Options};
-use teloxide::dispatching::update_listeners::{webhooks, UpdateListener};
+use teloxide::dispatching::update_listeners::webhooks;
 use teloxide::dispatching::{Dispatcher, UpdateFilterExt};
 use teloxide::error_handlers::LoggingErrorHandler;
-use teloxide::prelude::Requester;
 use teloxide::types::Update;
 use teloxide::{dptree, Bot};
 
 use crate::answer::words_answer;
-use crate::listener::build_listener;
+use crate::listener::axum_server;
 use crate::parse::get_words_from_json;
 use url::Url;
 use word::types::{PollingMode, Word};
-
-async fn health_check() -> StatusCode {
-    StatusCode::OK
-}
 
 #[tokio::main]
 async fn main() {
@@ -75,7 +66,7 @@ async fn main() {
             log::info!("URL: {}", url.clone().to_string());
 
             let addr = ([0, 0, 0, 0], port).into();
-            let listener = build_listener(bot.clone(), webhooks::Options::new(addr, url))
+            let listener = axum_server(bot.clone(), webhooks::Options::new(addr, url))
                 .await
                 .expect("Couldn't setup webhook");
 

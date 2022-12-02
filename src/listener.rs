@@ -1,11 +1,11 @@
-use crate::health_check;
+use axum::http::StatusCode;
 use axum::routing::get;
 use std::convert::Infallible;
 use teloxide::dispatching::update_listeners::webhooks::{axum_to_router, Options};
 use teloxide::dispatching::update_listeners::UpdateListener;
 use teloxide::requests::Requester;
 
-pub async fn build_listener<R>(
+pub async fn axum_server<R>(
     bot: R,
     options: Options,
 ) -> Result<impl UpdateListener<Err = Infallible>, R::Err>
@@ -18,7 +18,7 @@ where
     let (mut update_listener, stop_flag, app) = axum_to_router(bot, options).await?;
     let stop_token = update_listener.stop_token();
 
-    let app_health_check = app.route("/heath", get(health_check));
+    let app_health_check = app.route("/heath", get(|| async { StatusCode::OK }));
 
     tokio::spawn(async move {
         axum::Server::bind(&address)
