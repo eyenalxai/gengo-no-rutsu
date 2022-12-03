@@ -400,7 +400,6 @@ dependencies = [
  "rand",
  "serde",
  "serde_json",
- "strsim",
  "teloxide",
  "tokio",
  "trigram",
