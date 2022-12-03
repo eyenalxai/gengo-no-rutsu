@@ -1,11 +1,10 @@
 use crate::utils::constant::{ALL_NATIVE_ANSWER, ANSWER_PROBABILITY, CALL_FOR_HELP};
+use crate::utils::word::{filter_native_words, Word};
 use rand::{thread_rng, Rng};
 use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
 use teloxide::types::Message;
 use teloxide::{respond, Bot};
-
-use crate::utils::word::{filter_native_words, Word};
 
 fn build_answer_text(non_native_words: Vec<Word>) -> String {
     if non_native_words.is_empty() {
@@ -52,10 +51,10 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
 
 #[cfg(test)]
 mod answer_tests {
-    use crate::utils::answer::build_answer_text;
     use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP};
     use crate::utils::parse::get_words_from_json;
     use crate::utils::word::{filter_native_words, Word};
+    use crate::utils::words::build_answer_text;
 
     #[test]
     fn test_build_answer_text() {

@@ -1,13 +1,16 @@
+use rand::{thread_rng, Rng};
 use std::env;
 
 use teloxide::dispatching::update_listeners::webhooks;
 use teloxide::dispatching::{Dispatcher, UpdateFilterExt};
 use teloxide::error_handlers::LoggingErrorHandler;
-use teloxide::types::Update;
-use teloxide::{dptree, Bot};
+use teloxide::payloads::SendMessageSetters;
+use teloxide::prelude::ResponseResult;
+use teloxide::requests::{Requester, RequesterExt};
+use teloxide::types::{Message, Update};
+use teloxide::{dptree, respond, Bot};
 
 mod utils {
-    pub mod answer;
     pub mod constant;
     pub mod listener;
     pub mod parse;
@@ -15,10 +18,17 @@ mod utils {
     pub mod word;
 }
 
-use crate::utils::answer::words_answer;
+mod answer {
+    pub mod sorry;
+    pub mod words;
+}
+
+use crate::answer::words::words_answer;
+
+use crate::answer::sorry::{sorry_answer, sorry_filter};
 use crate::utils::listener::axum_server;
 use crate::utils::parse::get_words_from_json;
-use crate::utils::word::Word;
+use crate::utils::word::{filter_native_words, Word};
 use url::Url;
 
 #[derive(Debug, Clone, Copy)]
@@ -32,6 +42,7 @@ async fn main() {
     pretty_env_logger::init_timed();
 
     let bot = Bot::from_env();
+    let bot_id = bot.get_me().await.expect("Failed to get bot info").id.0;
 
     let polling_mode = match env::var("POLLING_MODE") {
         Ok(mode) => match mode.as_str() {
@@ -44,14 +55,16 @@ async fn main() {
 
     let words: Vec<Word> = get_words_from_json("./words.json");
 
-    let words_handler = Update::filter_message().branch(dptree::endpoint(words_answer));
+    let words_handler = Update::filter_message()
+        .branch(dptree::filter(sorry_filter).endpoint(sorry_answer))
+        .branch(dptree::endpoint(words_answer));
 
     match polling_mode {
         PollingMode::Polling => {
             log::info!("Polling!");
 
             Dispatcher::builder(bot, words_handler)
-                .dependencies(dptree::deps![words])
+                .dependencies(dptree::deps![words, bot_id])
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch()
@@ -80,7 +93,7 @@ async fn main() {
                 .expect("Couldn't setup webhook");
 
             Dispatcher::builder(bot, words_handler)
-                .dependencies(dptree::deps![words])
+                .dependencies(dptree::deps![words, bot_id])
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch_with_listener(listener, LoggingErrorHandler::new())
