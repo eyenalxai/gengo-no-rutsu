@@ -4,6 +4,10 @@ use teloxide::types::Message;
 use teloxide::{respond, Bot};
 
 pub fn sorry_filter(msg: Message, bot_id: u64) -> bool {
+    if !msg.chat.is_group() && !msg.chat.is_supergroup() {
+        return false;
+    }
+
     let reply_to_message = match msg.reply_to_message() {
         Some(b) => b,
         None => return false,

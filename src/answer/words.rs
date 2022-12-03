@@ -51,10 +51,10 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseR
 
 #[cfg(test)]
 mod answer_tests {
+    use crate::answer::words::build_answer_text;
     use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP};
     use crate::utils::parse::get_words_from_json;
     use crate::utils::word::{filter_native_words, Word};
-    use crate::utils::words::build_answer_text;
 
     #[test]
     fn test_build_answer_text() {

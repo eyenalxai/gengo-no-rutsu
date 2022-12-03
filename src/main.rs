@@ -1,14 +1,11 @@
-use rand::{thread_rng, Rng};
 use std::env;
+use teloxide::{dptree, Bot};
 
 use teloxide::dispatching::update_listeners::webhooks;
 use teloxide::dispatching::{Dispatcher, UpdateFilterExt};
 use teloxide::error_handlers::LoggingErrorHandler;
-use teloxide::payloads::SendMessageSetters;
-use teloxide::prelude::ResponseResult;
-use teloxide::requests::{Requester, RequesterExt};
-use teloxide::types::{Message, Update};
-use teloxide::{dptree, respond, Bot};
+use teloxide::requests::Requester;
+use teloxide::types::Update;
 
 mod utils {
     pub mod constant;
@@ -28,7 +25,7 @@ use crate::answer::words::words_answer;
 use crate::answer::sorry::{sorry_answer, sorry_filter};
 use crate::utils::listener::axum_server;
 use crate::utils::parse::get_words_from_json;
-use crate::utils::word::{filter_native_words, Word};
+use crate::utils::word::Word;
 use url::Url;
 
 #[derive(Debug, Clone, Copy)]
