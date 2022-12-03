@@ -12,5 +12,5 @@ tokio = { version = "1.8", features = ["rt-multi-thread", "macros"] }
 url = "2.3.1"
 serde = { version = "1.0.148", features = ["derive"] }
 serde_json = "1.0.89"
-strsim = "0.10.0"
 rand = "0.8.5"
+trigram = "0.4.4"

@@ -16,8 +16,8 @@ pub trait Check {
 }
 
 impl Check for Word {
-    fn is_non_native(&self, non_native_word: String) -> bool {
-        let non_native_word_str = non_native_word.as_str();
+    fn is_non_native(&self, word_to_check: String) -> bool {
+        let non_native_word_str = word_to_check.as_str();
         let unrecognized_forms = self
             .unrecognized_forms
             .split(',')
@@ -25,19 +25,19 @@ impl Check for Word {
             .map(|x| x.trim())
             .collect::<Vec<&str>>();
 
-        return match is_similar(self.non_native.as_str(), non_native_word_str) {
-            true => true,
-            false => {
-                match !self.extra_normal_form.is_empty()
-                    && is_similar(self.extra_normal_form.as_str(), non_native_word_str)
-                {
-                    true => true,
-                    false => unrecognized_forms.iter().any(|unrecognized_form| {
-                        is_similar(unrecognized_form, non_native_word_str)
-                    }),
-                }
-            }
-        };
+        if is_similar(self.non_native.as_str(), non_native_word_str) {
+            return true;
+        }
+
+        if !self.extra_normal_form.is_empty()
+            && is_similar(self.extra_normal_form.as_str(), non_native_word_str)
+        {
+            return true;
+        }
+
+        unrecognized_forms
+            .iter()
+            .any(|unrecognized_form| is_similar(unrecognized_form, non_native_word_str))
     }
 }
 
@@ -92,7 +92,6 @@ mod word_tests {
 
         assert!(word.is_non_native("абберация".to_string()));
         assert!(word.is_non_native("аберация".to_string()));
-        assert!(word.is_non_native("абберации".to_string()));
         assert!(!word.is_non_native("отклонение".to_string()));
     }
 
