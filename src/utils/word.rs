@@ -54,23 +54,20 @@ impl Display for Word {
     }
 }
 
-trait Cyrillic{
-    fn is_cyrillic(self) -> bool;
+trait Cyrillic {
+    fn is_cyrillic(&self) -> bool;
 }
 
 impl Cyrillic for char {
-    fn is_cyrillic(self) -> bool {
-        match self {
-            'а'..='я' | 'А'..='Я' => true,
-            _ => false,
-        }
+    fn is_cyrillic(&self) -> bool {
+        matches!(self, 'а'..='я' | 'А'..='Я')
     }
 }
 
 pub fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
     let to_check_only_cyrillic_alphabetic = to_check
         .chars()
-        .map(|c| if c.is_ascii_punctuation() {' '} else { c })
+        .map(|c| if c.is_ascii_punctuation() { ' ' } else { c })
         .filter(|c| c.is_cyrillic() || c.is_whitespace())
         .collect::<String>()
         .to_lowercase();
@@ -83,19 +80,16 @@ pub fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
         .iter()
         .cloned()
         .filter(|word: &Word| -> bool {
-            words_to_check.iter().any(|bad_word| {
-                word.is_non_native(bad_word.to_string())
-            })
+            words_to_check
+                .iter()
+                .any(|bad_word| word.is_non_native(bad_word.to_string()))
         })
         .collect::<Vec<Word>>()
 }
 
 #[cfg(test)]
 mod word_tests {
-
-    use std::vec;
-
-    use super::*;
+    use crate::utils::word::{filter_native_words, Check, Word};
 
     #[test]
     fn test_is_non_native() {
@@ -114,22 +108,27 @@ mod word_tests {
 
     #[test]
     fn test_filter_native_words() {
-        let mut vec_words = Vec::new();
-        vec_words.push(Word {
-            non_native: "абберация".to_string(),
-            native: "отклонение".to_string(),
-            inexact: "".to_string(),
-            extra_normal_form: "аберация".to_string(),
-            unrecognized_forms: "".to_string(),
-        });
-        vec_words.push(Word {
-            non_native: "аббревиатура".to_string(),
-            native: "сокращение".to_string(),
-            inexact: "".to_string(),
-            extra_normal_form: "абревиатура".to_string(),
-            unrecognized_forms: "".to_string()
-        });
-        assert_eq!(filter_native_words(vec_words.clone(), "абберация,абревиатура".to_string()), vec_words);
+        let vec_words: Vec<Word> = vec![
+            Word {
+                non_native: "абберация".to_string(),
+                native: "отклонение".to_string(),
+                inexact: "".to_string(),
+                extra_normal_form: "аберация".to_string(),
+                unrecognized_forms: "".to_string(),
+            },
+            Word {
+                non_native: "аббревиатура".to_string(),
+                native: "сокращение".to_string(),
+                inexact: "".to_string(),
+                extra_normal_form: "абревиатура".to_string(),
+                unrecognized_forms: "".to_string(),
+            },
+        ];
+
+        assert_eq!(
+            filter_native_words(vec_words.clone(), "абберация,абревиатура".to_string()),
+            vec_words
+        );
     }
 
     #[test]

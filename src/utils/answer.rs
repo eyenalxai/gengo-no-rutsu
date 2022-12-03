@@ -68,7 +68,7 @@ mod answer_tests {
         );
 
         let non_native_words_two =
-            filter_native_words(words.clone(), "кант систематик фабричный".to_string());
+            filter_native_words(words, "кант систематик фабричный".to_string());
 
         assert_eq!(
             build_answer_text(non_native_words_two),
