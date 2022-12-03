@@ -28,13 +28,16 @@ pub fn is_similar(str: &str, str_to_check: &str) -> bool {
     if !starts_ends_same(str, str_to_check) || !is_similar_length(str, str_to_check) {
         return false;
     }
-    println!(
-        "{} - {}, {}",
-        similarity(str, str_to_check),
+    let similarity = similarity(str, str_to_check);
+
+    log::debug!(
+        "Similarity: {} for words {} and {}",
+        similarity,
         str,
         str_to_check
     );
-    similarity(str, str_to_check) >= 0.55
+
+    similarity >= 0.55
 }
 
 #[cfg(test)]
