@@ -44704,14 +44704,6 @@
         "unrecognized_forms": ""
     },
     {
-        "non_native": "кросовки",
-        "exclusions": "",
-        "native": "беговки",
-        "inexact": "",
-        "extra_normal_form": "кросовок",
-        "unrecognized_forms": ""
-    },
-    {
         "non_native": "кроссворд",
         "exclusions": "",
         "native": "хлестослов, словосхлест",
@@ -44741,7 +44733,7 @@
         "native": "беговки",
         "inexact": "",
         "extra_normal_form": "кроссовок",
-        "unrecognized_forms": ""
+        "unrecognized_forms": "кросовки, кросовки"
     },
     {
         "non_native": "кроссплатформа",
