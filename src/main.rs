@@ -25,7 +25,7 @@ use crate::answer::words::words_answer;
 use crate::answer::sorry::{sorry_answer, sorry_filter};
 use crate::utils::listener::axum_server;
 use crate::utils::parse::get_words_from_json;
-use crate::utils::word::Word;
+use crate::utils::word::WordData;
 use url::Url;
 
 #[derive(Debug, Clone, Copy)]
@@ -50,9 +50,9 @@ async fn main() {
         Err(_) => panic!("POLLING_MODE env var is not set, probably..."),
     };
 
-    let words: Vec<Word> = get_words_from_json("./words.json");
+    let words_data: Vec<WordData> = get_words_from_json("./words_data.json");
 
-    let words_handler = Update::filter_message()
+    let handler = Update::filter_message()
         .branch(dptree::filter(sorry_filter).endpoint(sorry_answer))
         .branch(dptree::endpoint(words_answer));
 
@@ -60,8 +60,8 @@ async fn main() {
         PollingMode::Polling => {
             log::info!("Polling!");
 
-            Dispatcher::builder(bot, words_handler)
-                .dependencies(dptree::deps![words, bot_id])
+            Dispatcher::builder(bot, handler)
+                .dependencies(dptree::deps![words_data, bot_id])
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch()
@@ -89,8 +89,8 @@ async fn main() {
                 .await
                 .expect("Couldn't setup webhook");
 
-            Dispatcher::builder(bot, words_handler)
-                .dependencies(dptree::deps![words, bot_id])
+            Dispatcher::builder(bot, handler)
+                .dependencies(dptree::deps![words_data, bot_id])
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch_with_listener(listener, LoggingErrorHandler::new())

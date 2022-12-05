@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct Word {
+pub struct WordData {
     pub non_native: String,
     pub native: String,
     pub inexact: String,
@@ -15,7 +15,7 @@ pub trait Check {
     fn is_non_native(&self, word: String) -> bool;
 }
 
-impl Check for Word {
+impl Check for WordData {
     fn is_non_native(&self, word_to_check: String) -> bool {
         let non_native_word_str = word_to_check.as_str();
         let unrecognized_forms = self
@@ -41,7 +41,7 @@ impl Check for Word {
     }
 }
 
-impl Display for Word {
+impl Display for WordData {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if !self.inexact.is_empty() {
             return write!(
@@ -64,7 +64,7 @@ impl Cyrillic for char {
     }
 }
 
-pub fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
+pub fn filter_native_words(words: Vec<WordData>, to_check: String) -> Vec<WordData> {
     let to_check_only_cyrillic_alphabetic = to_check
         .chars()
         .map(|c| if c.is_ascii_punctuation() { ' ' } else { c })
@@ -79,21 +79,21 @@ pub fn filter_native_words(words: Vec<Word>, to_check: String) -> Vec<Word> {
     words
         .iter()
         .cloned()
-        .filter(|word: &Word| -> bool {
+        .filter(|word: &WordData| -> bool {
             words_to_check
                 .iter()
                 .any(|bad_word| word.is_non_native(bad_word.to_string()))
         })
-        .collect::<Vec<Word>>()
+        .collect::<Vec<WordData>>()
 }
 
 #[cfg(test)]
 mod word_tests {
-    use crate::utils::word::{filter_native_words, Check, Word};
+    use crate::utils::word::{filter_native_words, Check, WordData};
 
     #[test]
     fn test_is_non_native() {
-        let word = Word {
+        let word = WordData {
             non_native: "абберация".to_string(),
             native: "отклонение".to_string(),
             inexact: "".to_string(),
@@ -108,15 +108,15 @@ mod word_tests {
 
     #[test]
     fn test_filter_native_words() {
-        let vec_words: Vec<Word> = vec![
-            Word {
+        let vec_words: Vec<WordData> = vec![
+            WordData {
                 non_native: "абберация".to_string(),
                 native: "отклонение".to_string(),
                 inexact: "".to_string(),
                 extra_normal_form: "аберация".to_string(),
                 unrecognized_forms: "".to_string(),
             },
-            Word {
+            WordData {
                 non_native: "аббревиатура".to_string(),
                 native: "сокращение".to_string(),
                 inexact: "".to_string(),
@@ -133,7 +133,7 @@ mod word_tests {
 
     #[test]
     fn test_fmt() {
-        let word_one = Word {
+        let word_one = WordData {
             non_native: "абберация".to_string(),
             native: "отклонение".to_string(),
             inexact: "".to_string(),
@@ -143,7 +143,7 @@ mod word_tests {
 
         assert_eq!(format!("{}", word_one), "Не абберация, а отклонение.");
 
-        let word_two = Word {
+        let word_two = WordData {
             non_native: "кант".to_string(),
             native: "1) оторочка, тесьма, выпушка 2) края скользяка (у лыж и снегоката)"
                 .to_string(),

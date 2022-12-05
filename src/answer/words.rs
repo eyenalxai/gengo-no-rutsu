@@ -1,12 +1,12 @@
 use crate::utils::constant::{ALL_NATIVE_ANSWER, ANSWER_PROBABILITY, CALL_FOR_HELP};
-use crate::utils::word::{filter_native_words, Word};
+use crate::utils::word::{filter_native_words, WordData};
 use rand::{thread_rng, Rng};
 use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
 use teloxide::types::Message;
 use teloxide::{respond, Bot};
 
-fn build_answer_text(non_native_words: Vec<Word>) -> String {
+fn build_answer_text(non_native_words: Vec<WordData>) -> String {
     if non_native_words.is_empty() {
         return ALL_NATIVE_ANSWER.to_string();
     }
@@ -19,7 +19,7 @@ fn build_answer_text(non_native_words: Vec<Word>) -> String {
     )
 }
 
-pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Word>) -> ResponseResult<()> {
+pub async fn words_answer(bot: Bot, msg: Message, words: Vec<WordData>) -> ResponseResult<()> {
     let msg_text = match msg.text() {
         Some(b) => b,
         None => return respond(()),
@@ -54,11 +54,11 @@ mod answer_tests {
     use crate::answer::words::build_answer_text;
     use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP};
     use crate::utils::parse::get_words_from_json;
-    use crate::utils::word::{filter_native_words, Word};
+    use crate::utils::word::{filter_native_words, WordData};
 
     #[test]
     fn test_build_answer_text() {
-        let words: Vec<Word> = get_words_from_json("./words.json");
+        let words: Vec<WordData> = get_words_from_json("./words_data.json");
         let non_native_words_one = filter_native_words(words.clone(), "приплясывание".to_string());
 
         assert_eq!(
