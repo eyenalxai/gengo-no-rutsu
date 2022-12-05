@@ -60,7 +60,7 @@ trait Cyrillic {
 
 impl Cyrillic for char {
     fn is_cyrillic(&self) -> bool {
-        matches!(self, 'а'..='я' | 'А'..='Я')
+        matches!(self, 'а'..='я' | 'А'..='Я' | 'ё' | 'Ё')
     }
 }
 
@@ -104,6 +104,17 @@ mod word_tests {
         assert!(word.is_non_native("абберация".to_string()));
         assert!(word.is_non_native("аберация".to_string()));
         assert!(!word.is_non_native("отклонение".to_string()));
+
+        let word = WordData {
+            non_native: "волонтёр".to_string(),
+            native: "доброволец".to_string(),
+            inexact: "".to_string(),
+            extra_normal_form: "".to_string(),
+            unrecognized_forms: "".to_string(),
+        };
+
+        assert!(word.is_non_native("волонтёр".to_string()));
+        assert!(!word.is_non_native("доброволец".to_string()));
     }
 
     #[test]
