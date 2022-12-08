@@ -1,5 +1,6 @@
 use crate::utils::constant::{ALL_NATIVE_ANSWER, ANSWER_PROBABILITY, CALL_FOR_HELP};
-use crate::utils::word::{filter_native_words, WordData};
+use crate::utils::word::filter_native_words;
+use crate::utils::morpheme::{WordData, Loan, PrefixData};
 use rand::{thread_rng, Rng};
 use teloxide::payloads::SendMessageSetters;
 use teloxide::requests::{Requester, ResponseResult};
@@ -19,13 +20,13 @@ fn build_answer_text(non_native_words: Vec<WordData>) -> String {
     )
 }
 
-pub async fn words_answer(bot: Bot, msg: Message, words: Vec<WordData>) -> ResponseResult<()> {
+pub async fn words_answer(bot: Bot, msg: Message, words: Vec<Loan>, prefixes: Vec<PrefixData>) -> ResponseResult<()> {
     let msg_text = match msg.text() {
         Some(b) => b,
         None => return respond(()),
     };
 
-    let non_native_words = filter_native_words(words, msg_text.to_string());
+    let non_native_words = filter_native_words(&words, &prefixes, msg_text.to_string());
     let is_private_chat = !msg.chat.is_group() && !msg.chat.is_supergroup();
 
     match (non_native_words.is_empty(), is_private_chat) {
@@ -52,14 +53,16 @@ pub async fn words_answer(bot: Bot, msg: Message, words: Vec<WordData>) -> Respo
 #[cfg(test)]
 mod answer_tests {
     use crate::answer::words::build_answer_text;
-    use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP};
-    use crate::utils::parse::get_words_from_json;
-    use crate::utils::word::{filter_native_words, WordData};
+    use crate::utils::constant::{ALL_NATIVE_ANSWER, CALL_FOR_HELP, ROOTS_FILE};
+    use crate::utils::parse::parse_from_json_file;
+    use crate::utils::word::filter_native_words;
+    use crate::utils::morpheme::{Loan, PrefixData};
 
     #[test]
     fn test_build_answer_text() {
-        let words: Vec<WordData> = get_words_from_json("./words_data.json");
-        let non_native_words_one = filter_native_words(words.clone(), "приплясывание".to_string());
+        let words: Vec<Loan> = parse_from_json_file(ROOTS_FILE);
+        let prefixes = vec![PrefixData::default()];
+        let non_native_words_one = filter_native_words(&words, &prefixes, "приплясывание".to_string());
 
         assert_eq!(
             build_answer_text(non_native_words_one),
@@ -67,7 +70,7 @@ mod answer_tests {
         );
 
         let non_native_words_two =
-            filter_native_words(words, "кант систематик фабричный".to_string());
+            filter_native_words(&words, &prefixes, "кант систематик фабричный".to_string());
 
         assert_eq!(
             build_answer_text(non_native_words_two),
