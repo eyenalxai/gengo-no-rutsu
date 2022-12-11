@@ -59,12 +59,13 @@ async fn main() {
         .branch(dptree::filter(sorry_filter).endpoint(sorry_answer))
         .branch(dptree::endpoint(words_answer));
 
+    let dependency_map = dptree::deps![words_data, bot_id, prefix_data];
     match polling_mode {
         PollingMode::Polling => {
             log::info!("Polling!");
 
             Dispatcher::builder(bot, handler)
-                .dependencies(dptree::deps![words_data, bot_id, prefix_data])
+                .dependencies(dependency_map)
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch()
@@ -93,7 +94,7 @@ async fn main() {
                 .expect("Couldn't setup webhook");
 
             Dispatcher::builder(bot, handler)
-                .dependencies(dptree::deps![words_data, bot_id])
+                .dependencies(dependency_map)
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch_with_listener(listener, LoggingErrorHandler::new())
