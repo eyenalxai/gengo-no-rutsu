@@ -56,6 +56,7 @@ pub fn filter_native_words<'data>(words: &'data Vec<Loan>, prefixes: &'data Vec<
     words_to_check
         .iter()
         .filter_map(|bad_word| {
+            let bad_word = bad_word.trim_end_matches("ы");
             let loanroot = prefixes
                 .iter()
                 .find_map(|prefix: &PrefixData| {
@@ -75,7 +76,7 @@ pub fn filter_native_words<'data>(words: &'data Vec<Loan>, prefixes: &'data Vec<
                 prefixes
                 .iter()
                 .filter(|prefix| {
-                    bad_word.len() > prefix.base.len() && prefix.target.len() > 0
+                    bad_word.len() > prefix.base.len() + 2 * 3 && prefix.target.len() > 0
                 })
                 .find_map(|prefix: &PrefixData| {
                     if &bad_word[..prefix.base.len()] == prefix.base {
