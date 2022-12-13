@@ -6,14 +6,12 @@ use teloxide::dispatching::{Dispatcher, UpdateFilterExt};
 use teloxide::error_handlers::LoggingErrorHandler;
 use teloxide::requests::Requester;
 use teloxide::types::Update;
-use utils::constant::{PREFIXES_FILE, ROOTS_FILE};
 
 mod utils {
     pub mod constant;
     pub mod listener;
     pub mod parse;
     pub mod str;
-    pub mod morpheme;
     pub mod word;
 }
 
@@ -26,8 +24,8 @@ use crate::answer::words::words_answer;
 
 use crate::answer::sorry::{sorry_answer, sorry_filter};
 use crate::utils::listener::axum_server;
-use crate::utils::parse::parse_from_json_file;
-use crate::utils::morpheme::{PrefixData, Loan};
+use crate::utils::parse::get_words_from_json;
+use crate::utils::word::WordData;
 use url::Url;
 
 #[derive(Debug, Clone, Copy)]
@@ -52,20 +50,18 @@ async fn main() {
         Err(_) => panic!("POLLING_MODE env var is not set, probably..."),
     };
 
-    let words_data: Vec<Loan> = parse_from_json_file(ROOTS_FILE);
-    let prefix_data: Vec<PrefixData> = parse_from_json_file(PREFIXES_FILE);
+    let words_data: Vec<WordData> = get_words_from_json("./words_data.json");
 
     let handler = Update::filter_message()
         .branch(dptree::filter(sorry_filter).endpoint(sorry_answer))
         .branch(dptree::endpoint(words_answer));
 
-    let dependency_map = dptree::deps![words_data, bot_id, prefix_data];
     match polling_mode {
         PollingMode::Polling => {
             log::info!("Polling!");
 
             Dispatcher::builder(bot, handler)
-                .dependencies(dependency_map)
+                .dependencies(dptree::deps![words_data, bot_id])
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch()
@@ -94,7 +90,7 @@ async fn main() {
                 .expect("Couldn't setup webhook");
 
             Dispatcher::builder(bot, handler)
-                .dependencies(dependency_map)
+                .dependencies(dptree::deps![words_data, bot_id])
                 .enable_ctrlc_handler()
                 .build()
                 .dispatch_with_listener(listener, LoggingErrorHandler::new())

@@ -1,8 +1,8 @@
-use serde::Deserialize;
+use crate::utils::word::WordData;
 use std::fs::File;
 use std::io::BufReader;
 
-pub fn parse_from_json_file<T: for<'a> Deserialize<'a>>(path: &str) -> T {
+pub fn get_words_from_json(path: &str) -> Vec<WordData> {
     let file = match File::open(path) {
         Ok(file) => file,
         Err(e) => panic!("Error opening file words_data.json: {}", e),

@@ -40,16 +40,6 @@ pub fn is_similar(str: &str, str_to_check: &str) -> bool {
     similarity >= 0.55
 }
 
-trait Cyrillic {
-    fn is_cyrillic(&self) -> bool;
-}
-
-impl Cyrillic for char {
-    fn is_cyrillic(&self) -> bool {
-        matches!(self, 'а'..='я' | 'А'..='Я' | 'ё' | 'Ё')
-    }
-}
-
 #[cfg(test)]
 mod str_tests {
     use crate::utils::str::{is_same_first_char, is_similar};

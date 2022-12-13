@@ -36,4 +36,3 @@ debug/
 target/
 **/*.rs.bk
 *.pdb
-tool.py
